@@ -1,2 +1,8 @@
 www/**/*.obj
 www/**/*.zip
+backups/
+www/**/*.obj
+www/**/*.zip
+.storage/
+home-assistant_v2.db*
+home-assistant.log*
