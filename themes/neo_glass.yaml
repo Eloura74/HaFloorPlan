@@ -1,0 +1,18 @@
+Neo Glass:
+  modes:
+    dark:
+      background: "linear-gradient(135deg,#2b1f64 0%,#e0467b 50%,#ffa45b 100%)"
+      card-background-color: "rgba(12,16,24,0.25)"
+      ha-card-border-radius: "18px"
+      primary-text-color: "#f6f7fb"
+      secondary-text-color: "#d9dbe6"
+      app-header-background-color: "rgba(12,16,24,0.35)"
+      divider-color: "rgba(255,255,255,0.12)"
+      card-mod-theme: Neo Glass
+      card-mod-card: |
+        ha-card {
+          backdrop-filter: blur(14px) saturate(140%);
+          -webkit-backdrop-filter: blur(14px) saturate(140%);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 12px 30px rgba(0,0,0,.35);
+        }
