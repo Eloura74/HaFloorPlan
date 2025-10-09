@@ -22,3 +22,5 @@ secrets.yaml
 Thumbs.db
 .vscode/
 .idea/
+backups/
+*.tar
