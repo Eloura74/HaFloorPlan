@@ -1,0 +1,19 @@
+NeoTech:
+  # fond global
+  lovelace-background: 'radial-gradient(1200px 800px at 20% 10%, rgba(255,0,128,.08), transparent 60%), linear-gradient(180deg,#0b0f18,#0a0d14)'
+  primary-color: "#00d1ff"
+  accent-color: "#ff2a66"
+  card-background-color: "rgba(14,18,28,0.6)"
+  primary-text-color: "#e6eef8"
+  secondary-text-color: "#a0b3c5"
+  divider-color: "rgba(255,255,255,0.08)"
+  app-header-background-color: "rgba(10,14,22,0.8)"
+  app-header-text-color: "#e6eef8"
+  # mushroom accents
+  mush-rgb-accent: 255,42,102
+  mush-rgb-primary: 0,209,255
+  mush-rgb-state-media-player: 0,209,255
+  mush-rgb-state-light: 255,42,102
+  code-editor-background-color: '#1e1e1e'
+  code-editor-foreground-color:  '#e6e6e6'
+  code-editor-gutter-color:      '#2a2a2a'

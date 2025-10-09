@@ -1,0 +1,40 @@
+Or Tech+:
+  modes:
+    dark:
+      # Base
+      primary-text-color: "#e8eaf0"
+      secondary-text-color: "#b7beca"
+      primary-color: "#d4af37"
+      accent-color: "#f2c94c"
+      warning-color: "#ffb86b"
+      success-color: "#7bd88f"
+      error-color: "#ff6b6b"
+      background: "linear-gradient(180deg,#0b0e12 0%,#111418 100%)"
+      card-background-color: "#171a1f"
+      ha-card-border-radius: "18px"
+      app-header-background-color: "#0b0e12"
+      paper-item-icon-color: "#c6cbd6"
+      paper-item-icon-active-color: "#ffdf7e"
+
+      # Mushroom — densité, arrondis, typos, ombres
+      mush-card-primary-font-size: 16px
+      mush-card-secondary-font-size: 12px
+      mush-title-font-size: 20px
+      mush-chips-spacing: 6px
+      mush-control-border-radius: 14px
+      mush-card-border-radius: 18px
+      mush-spacing: 10px
+      mush-icon-border-radius: 12px
+      mush-overlay-opacity: 0.18
+
+      # Ombres subtiles
+      card-mod-theme: Or Tech+
+      card-mod-card: |
+        ha-card {
+          box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.25);
+          border: 1px solid rgba(255,255,255,.04);
+        }
+      card-mod-root-yaml: |
+        .header {
+          --mdc-theme-primary: #d4af37;
+        }

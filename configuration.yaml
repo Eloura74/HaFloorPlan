@@ -1,0 +1,89 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+template:
+  - sensor:
+      # ───────── PÉRIODE (fond 12h/16h/20h)
+      - name: floorplan_period
+        unique_id: floorplan_period
+        state: >
+          {% set h = now().hour %}
+          {% if 8 <= h < 16 %}12h{% elif 16 <= h < 20 %}16h{% else %}20h{% endif %}
+        icon: mdi:clock-time-four
+
+      # ───────── SALON — overlays (sorties: 12h_on / 12h_off / 16h_on / etc.)
+      - name: floorplan_canape_overlay
+        unique_id: floorplan_canape_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if is_state('light.canape','on') else '_off') }}
+
+      - name: floorplan_cheminee_overlay
+        unique_id: floorplan_cheminee_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if is_state('light.cheminee','on') else '_off') }}
+
+      - name: floorplan_tv_overlay
+        unique_id: floorplan_tv_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set s = states('media_player.bboxtv') %}
+          {{ p ~ ('_on' if s in ['on','playing','paused'] else '_off') }}
+
+      # ───────── BUREAU — overlays (entités réelles)
+      - name: floorplan_bureau_sw_overlay
+        unique_id: floorplan_bureau_sw_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if is_state('light.led_switchwire','on') else '_off') }}
+
+      - name: floorplan_bureau_spot_overlay
+        unique_id: floorplan_bureau_spot_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if is_state('light.bureau_led3','on') else '_off') }}
+
+      - name: floorplan_bureau_pc_overlay
+        unique_id: floorplan_bureau_pc_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.bureau_pc') == 'on' else '_off') }}
+
+      - name: floorplan_bureau_vz_overlay
+        unique_id: floorplan_bureau_vz_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.vzbot_socket_1') == 'on' else '_off') }}
+
+      - name: floorplan_bureau_spool_overlay
+        unique_id: floorplan_bureau_spool_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.bureau_spool') == 'on' else '_off') }}
+
+      - name: floorplan_bureau_anycubic_mono_overlay
+        unique_id: floorplan_bureau_anycubic_mono_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.anycubic_mono') == 'on' else '_off') }}
+
+      - name: floorplan_bureau_anycubic_pro_overlay
+        unique_id: floorplan_bureau_anycubic_pro_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.anycubic_pro') == 'on' else '_off') }}
+
+      - name: floorplan_bureau_a1_overlay
+        unique_id: floorplan_bureau_a1_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period')|trim %}
+          {{ p ~ ('_on' if states('switch.bureau_a1') == 'on' else '_off') }}
