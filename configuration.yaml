@@ -1,7 +1,6 @@
-# Loads default set of integrations. Do not remove.
+# ===================== BASE =====================
 default_config:
 
-# Load frontend themes from the themes folder
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -9,81 +8,250 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+
+# ===================== HELPERS ==================
+input_boolean:
+  # ── BUREAU (fake)
+  bureau_pc:
+    name: Bureau PC (fake)
+  switchwire_socket_1:
+    name: Prise Switchwire (fake)
+  bureau_spool:
+    name: Spool (fake)
+  anycubic_mono:
+    name: Anycubic Mono (fake)
+  anycubic_pro:
+    name: Anycubic Pro (fake)
+  bureau_a1:
+    name: A1 (fake)
+
+  # ── TERRASSE (simulation parasol)
+  terrasse_parasol:
+    name: Parasol Terrasse (fake)
+
+  # ── CUISINE (helpers pilotés en lights)
+  cuisine_ecl:
+    name: Cuisine Éclairage plafond (fake)
+  cuisine_plan:
+    name: Cuisine Plan de travail (fake)
+  cuisine_cheminee:
+    name: Cuisine Cheminée (fake)
+  cuisine_four:
+    name: Cuisine Four (fake)
+
+# Sélecteur manuel/auto de période d’affichage
+input_select:
+  floorplan_period_mode:
+    name: Mode période floorplan
+    options: ["Auto", "12h", "16h", "20h"]
+    initial: "Auto"
+    icon: mdi:white-balance-sunny
+
+
+# ===================== LIGHTS ===================
+# Normalise les équipements en lights (terrasse réels via switch, cuisine via helpers)
+light:
+  - platform: template
+    lights:
+
+      terrasse_eclairage:
+        friendly_name: "Éclairage terrasse"
+        value_template: "{{ is_state('switch.eclairage_cible_switch_1','on') }}"
+        turn_on:
+          service: switch.turn_on
+          target: { entity_id: switch.eclairage_cible_switch_1 }
+        turn_off:
+          service: switch.turn_off
+          target: { entity_id: switch.eclairage_cible_switch_1 }
+        availability_template: "{{ states('switch.eclairage_cible_switch_1') not in ['unknown','unavailable',''] }}"
+
+      terrasse_piscine:
+        friendly_name: "Piscine"
+        value_template: "{{ is_state('switch.piscine_switch_1','on') }}"
+        turn_on:
+          service: switch.turn_on
+          target: { entity_id: switch.piscine_switch_1 }
+        turn_off:
+          service: switch.turn_off
+          target: { entity_id: switch.piscine_switch_1 }
+        availability_template: "{{ states('switch.piscine_switch_1') not in ['unknown','unavailable',''] }}"
+
+      # ── CUISINE pilotée par helpers
+      cuisine_eclairage:
+        friendly_name: "Cuisine - Éclairage plafond"
+        value_template: "{{ is_state('input_boolean.cuisine_ecl','on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target: { entity_id: input_boolean.cuisine_ecl }
+        turn_off:
+          service: input_boolean.turn_off
+          target: { entity_id: input_boolean.cuisine_ecl }
+        availability_template: "{{ states('input_boolean.cuisine_ecl') not in ['unknown','unavailable',''] }}"
+
+      cuisine_plan:
+        friendly_name: "Cuisine - Plan de travail"
+        value_template: "{{ is_state('input_boolean.cuisine_plan','on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target: { entity_id: input_boolean.cuisine_plan }
+        turn_off:
+          service: input_boolean.turn_off
+          target: { entity_id: input_boolean.cuisine_plan }
+        availability_template: "{{ states('input_boolean.cuisine_plan') not in ['unknown','unavailable',''] }}"
+
+      cuisine_cheminee:
+        friendly_name: "Cuisine - Cheminée"
+        value_template: "{{ is_state('input_boolean.cuisine_cheminee','on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target: { entity_id: input_boolean.cuisine_cheminee }
+        turn_off:
+          service: input_boolean.turn_off
+          target: { entity_id: input_boolean.cuisine_cheminee }
+        availability_template: "{{ states('input_boolean.cuisine_cheminee') not in ['unknown','unavailable',''] }}"
+
+      cuisine_four:
+        friendly_name: "Cuisine - Four"
+        value_template: "{{ is_state('input_boolean.cuisine_four','on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target: { entity_id: input_boolean.cuisine_four }
+        turn_off:
+          service: input_boolean.turn_off
+          target: { entity_id: input_boolean.cuisine_four }
+        availability_template: "{{ states('input_boolean.cuisine_four') not in ['unknown','unavailable',''] }}"
+
+
+# ===================== TEMPLATE =================
 template:
   - sensor:
-      # ───────── PÉRIODE (fond 12h/16h/20h)
+      # ── Période avec override manuel
       - name: floorplan_period
         unique_id: floorplan_period
         state: >
-          {% set h = now().hour %}
-          {% if 8 <= h < 16 %}12h{% elif 16 <= h < 20 %}16h{% else %}20h{% endif %}
+          {% set mode = states('input_select.floorplan_period_mode') %}
+          {% if mode != 'Auto' %}
+            {{ mode }}
+          {% else %}
+            {% set h = now().hour %}
+            {% if 8 <= h < 16 %}12h{% elif 16 <= h < 20 %}16h{% else %}20h{% endif %}
+          {% endif %}
         icon: mdi:clock-time-four
+        availability: "{{ states('input_select.floorplan_period_mode') not in ['unknown','unavailable',''] }}"
 
-      # ───────── SALON — overlays (sorties: 12h_on / 12h_off / 16h_on / etc.)
+      # ── SALON
       - name: floorplan_canape_overlay
         unique_id: floorplan_canape_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set p = states('sensor.floorplan_period') %}
           {{ p ~ ('_on' if is_state('light.canape','on') else '_off') }}
-
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_cheminee_overlay
         unique_id: floorplan_cheminee_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set p = states('sensor.floorplan_period') %}
           {{ p ~ ('_on' if is_state('light.cheminee','on') else '_off') }}
-
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_tv_overlay
         unique_id: floorplan_tv_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set p = states('sensor.floorplan_period') %}
           {% set s = states('media_player.bboxtv') %}
-          {{ p ~ ('_on' if s in ['on','playing','paused'] else '_off') }}
+          {{ p ~ ('_on' if s not in ['off','unknown','unavailable'] else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
 
-      # ───────── BUREAU — overlays (entités réelles)
+      # ── BUREAU
       - name: floorplan_bureau_sw_overlay
         unique_id: floorplan_bureau_sw_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set p = states('sensor.floorplan_period') %}
           {{ p ~ ('_on' if is_state('light.led_switchwire','on') else '_off') }}
-
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_spot_overlay
         unique_id: floorplan_bureau_spot_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
+          {% set p = states('sensor.floorplan_period') %}
           {{ p ~ ('_on' if is_state('light.bureau_led3','on') else '_off') }}
-
-      - name: floorplan_bureau_pc_overlay
-        unique_id: floorplan_bureau_pc_overlay
-        state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.bureau_pc') == 'on' else '_off') }}
-
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_vz_overlay
         unique_id: floorplan_bureau_vz_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.vzbot_socket_1') == 'on' else '_off') }}
-
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('switch.vzbot_socket_1','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_bureau_pc_overlay
+        unique_id: floorplan_bureau_pc_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.bureau_pc','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_spool_overlay
         unique_id: floorplan_bureau_spool_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.bureau_spool') == 'on' else '_off') }}
-
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.bureau_spool','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_anycubic_mono_overlay
         unique_id: floorplan_bureau_anycubic_mono_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.anycubic_mono') == 'on' else '_off') }}
-
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.anycubic_mono','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_anycubic_pro_overlay
         unique_id: floorplan_bureau_anycubic_pro_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.anycubic_pro') == 'on' else '_off') }}
-
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.anycubic_pro','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
       - name: floorplan_bureau_a1_overlay
         unique_id: floorplan_bureau_a1_overlay
         state: >
-          {% set p = states('sensor.floorplan_period')|trim %}
-          {{ p ~ ('_on' if states('switch.bureau_a1') == 'on' else '_off') }}
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.bureau_a1','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+
+      # ── TERRASSE
+      - name: floorplan_terrasse_piscine_overlay
+        unique_id: floorplan_terrasse_piscine_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('switch.piscine_switch_1','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_terrasse_ecl_overlay
+        unique_id: floorplan_terrasse_ecl_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('switch.eclairage_cible_switch_1','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_terrasse_parasol_overlay
+        unique_id: floorplan_terrasse_parasol_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('input_boolean.terrasse_parasol','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+
+      # ── CUISINE
+      - name: floorplan_cuisine_ecl_overlay
+        unique_id: floorplan_cuisine_ecl_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('light.cuisine_eclairage','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_cuisine_plan_overlay
+        unique_id: floorplan_cuisine_plan_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('light.cuisine_plan','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_cuisine_cheminee_overlay
+        unique_id: floorplan_cuisine_cheminee_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('light.cuisine_cheminee','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"
+      - name: floorplan_cuisine_four_overlay
+        unique_id: floorplan_cuisine_four_overlay
+        state: >
+          {% set p = states('sensor.floorplan_period') %}
+          {{ p ~ ('_on' if is_state('light.cuisine_four','on') else '_off') }}
+        availability: "{{ states('sensor.floorplan_period') not in ['unknown','unavailable',''] }}"

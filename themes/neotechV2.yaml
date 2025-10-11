@@ -1,0 +1,38 @@
+NeoTechV2:
+  # FOND
+  lovelace-background: >
+    radial-gradient(1200px 800px at 20% 10%, rgba(255,0,128,.08), transparent 60%),
+    linear-gradient(180deg,#0b0f18,#0a0d14)
+
+  # PALETTE GÉNÉRALE
+  primary-color: "#ff004d"                  # couleur marque
+  accent-color:  "#ff004d"
+  state-icon-color: "#ff7fa3"               # icônes (remplace le bleu)
+  paper-item-icon-color: "#ff7fa3"          # compat anciens composants
+
+  primary-text-color:   "#e6eef8"
+  secondary-text-color: "#a0b3c5"
+  card-background-color: "rgba(14,18,28,0.6)"
+  divider-color: "rgba(255,255,255,0.08)"
+
+  # BARRE D’EN-TÊTE
+  app-header-background-color: "rgba(10,14,22,0.8)"
+  app-header-text-color: "#e6eef8"
+
+  # MDC/MD3 TOKENS (selon versions HA)
+  mdc-theme-primary: "#ff004d"
+  md-sys-color-primary: "#ff004d"
+
+  # MUSHROOM (doit être en RGB sans #)
+  mush-rgb-accent: 255,0,77
+  mush-rgb-primary: 255,127,163
+  mush-rgb-state-media-player: 255,0,77
+  mush-rgb-state-light: 255,0,77
+  mush-rgb-info: 255,127,163
+  mush-rgb-warning: 255,127,163
+  mush-rgb-success: 255,127,163
+
+  # ÉDITEUR DE CODE
+  code-editor-background-color: '#1e1e1e'
+  code-editor-foreground-color:  '#e6e6e6'
+  code-editor-gutter-color:      '#2a2a2a'

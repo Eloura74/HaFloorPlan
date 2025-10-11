@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Motif de trous (grille de points) -->
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="3" fill="black"/>
+    </pattern>
+
+    <!-- Masque : disque blanc auquel on "soustrait" le motif de points -->
+    <mask id="holes">
+      <rect width="256" height="256" fill="black"/>
+      <!-- zone utile du disque -->
+      <circle cx="128" cy="128" r="86" fill="white"/>
+      <!-- trous -->
+      <rect width="256" height="256" fill="url(#dots)"/>
+    </mask>
+  </defs>
+
+  <!-- DISQUE PERFORÉ (couleur dynamique via currentColor) -->
+  <circle cx="128" cy="128" r="86" fill="currentColor" mask="url(#holes)"/>
+
+  <!-- ANNEAU EXTÉRIEUR -->
+  <circle cx="128" cy="128" r="86" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="10"/>
+
+  <!-- MOYEU (petit anneau central) -->
+  <circle cx="128" cy="128" r="18" fill="none" stroke="currentColor" stroke-width="8" stroke-opacity="0.9"/>
+  <!-- Perçage au centre -->
+  <circle cx="128" cy="128" r="6" fill="#0b0e12"/>
+</svg>
